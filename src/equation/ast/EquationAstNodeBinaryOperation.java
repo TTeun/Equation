@@ -1,9 +1,11 @@
 package equation.ast;
 
-public class EquationAstNodeBinaryOperation extends EquationAstNode {
+import equation.parser.exception.EquationException;
 
-    final private EquationAstNode leftOperand;
-    final private EquationAstNode rightOperand;
+public abstract class EquationAstNodeBinaryOperation extends EquationAstNode {
+
+    protected EquationAstNode leftOperand;
+    protected EquationAstNode rightOperand;
 
     public EquationAstNodeBinaryOperation(String value, EquationAstNode leftOperand, EquationAstNode rightOperand) {
         super(value, Type.BinaryOperation);
@@ -16,4 +18,21 @@ public class EquationAstNodeBinaryOperation extends EquationAstNode {
         return '(' + leftOperand.toString() + value + rightOperand.toString() + ")";
     }
 
+    @Override
+    public void simplify() throws EquationException {
+        leftOperand.simplify();
+        rightOperand.simplify();
+
+        try {
+            double lhs = leftOperand.evaluate();
+            leftOperand = new EquationAstNodeDouble(lhs);
+        } catch (EquationException e) {
+
+        }
+        try {
+            double rhs = rightOperand.evaluate();
+            rightOperand = new EquationAstNodeDouble(rhs);
+        } catch (EquationException e) {
+        }
+    }
 }

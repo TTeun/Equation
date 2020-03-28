@@ -1,18 +1,25 @@
 package equation;
 
-import equation.ast.EquationAstNode;
+import equation.ast.EquationAst;
+import equation.parser.exception.EquationException;
 import org.jetbrains.annotations.NotNull;
 
 public class Equation {
 
     final private EquationHead equationHead;
-    final private EquationAstNode equationAstNode;
+    final private EquationAst equationAst;
 
-    public Equation(@NotNull EquationHead equationHead, @NotNull EquationAstNode equationAstNode) {
+    public Equation(@NotNull EquationHead equationHead, @NotNull EquationAst equationAst) throws EquationException {
         this.equationHead = equationHead;
-        this.equationAstNode = equationAstNode;
+        this.equationAst = equationAst;
+        this.equationAst.simplify();
         System.out.println("Equation created:");
         System.out.println("\t" + equationHead.toString());
-        System.out.println("\t" + equationAstNode.toString());
+        System.out.println("\t" + equationAst.toString());
     }
+
+    public Double evaluate() throws EquationException {
+        return equationAst.evaluate();
+    }
+
 }

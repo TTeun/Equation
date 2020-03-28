@@ -1,8 +1,10 @@
 package equation.ast;
 
-public class EquationAstNode {
+import equation.parser.exception.EquationException;
 
-    public final String value;
+public abstract class EquationAstNode {
+
+    public String value;
     public final Type type;
 
     public EquationAstNode() {
@@ -14,6 +16,11 @@ public class EquationAstNode {
         this.value = value;
         this.type = type;
     }
+
+    public abstract double evaluate() throws EquationException;
+
+    public abstract void simplify() throws EquationException;
+
 
     public enum Type {
         Constant, Variable, BinaryOperation, UnaryOperation, PreDefinedUnaryFunction, CustomUnaryFunction, PreDefinedFunction, CustomFunction, Error

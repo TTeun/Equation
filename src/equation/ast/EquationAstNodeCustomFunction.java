@@ -1,5 +1,6 @@
 package equation.ast;
 
+import equation.parser.exception.EquationException;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Vector;
@@ -35,5 +36,15 @@ public class EquationAstNodeCustomFunction extends EquationAstNode {
 
         stringBuffer.append(")");
         return new String(stringBuffer);
+    }
+
+    @Override
+    public double evaluate() throws EquationException {
+        throw new EquationException("Custom function evaluate not yet implemented (make this class abstract)!");
+    }
+
+    @Override
+    public void simplify() throws EquationException {
+        throw new EquationException("Custom function simplify not yet implemented (make this class abstract)!");
     }
 }

@@ -1,6 +1,7 @@
 package equation.parser;
 
 import equation.ast.*;
+import equation.ast.predefined.*;
 import equation.parser.exception.BadBodyException;
 import equation.parser.exception.EquationException;
 
@@ -27,10 +28,9 @@ public class EquationBodyParser {
         astNodes = new Vector<EquationAstNode>(0);
     }
 
-    public static EquationAstNode parseEquationBody(String equationBodyString) throws EquationException {
-        System.out.println(equationBodyString);
-        EquationAstNode equationAstNode = (new EquationBodyParser()).parseEquationBody_internal(equationBodyString);
-        return equationAstNode;
+    public static EquationAst parseEquationBody(String equationBodyString) throws EquationException {
+//        System.out.println(equationBodyString);
+        return new EquationAst((new EquationBodyParser()).parseEquationBody_internal(equationBodyString));
     }
 
     static private int findMaximumDepth(String equationBodyString, Pattern pattern) throws EquationException {
@@ -92,9 +92,9 @@ public class EquationBodyParser {
 
             if (parameters.length == 1) {
                 if (Pattern.compile("sin|cos|tan|exp").matcher(functionName).matches()) {
-                    astNodes.add(new EquationAstNodePreDefinedUnaryFunction(functionName, parseEquationBody_NoBrackets_NoFunctions_internal(parameters[0])));
+                    astNodes.add(EquationAstNodePreDefinedUnaryFunction.create(functionName, parseEquationBody_NoBrackets_NoFunctions_internal(parameters[0])));
                 } else {
-                    astNodes.add(new EquationAstNodeUnaryFunction(functionName, parseEquationBody_NoBrackets_NoFunctions_internal(parameters[0])));
+                    astNodes.add(new EquationAstNodeCustomUnaryFunction(functionName, parseEquationBody_NoBrackets_NoFunctions_internal(parameters[0])));
                 }
             } else {
                 EquationAstNodeCustomFunction equationNode = new EquationAstNodeCustomFunction(functionName, parameters.length);
@@ -119,7 +119,7 @@ public class EquationBodyParser {
             String match = equationBodyString.substring(powerMatcher.start(), powerMatcher.end());
             String[] splitString = match.split("\\^");
             equationBodyString = equationBodyString.substring(0, powerMatcher.start()) + "<" + replacementIndex + equationBodyString.substring(powerMatcher.end());
-            astNodes.add(new EquationAstNodeBinaryOperation("^", stringToNode(splitString[0]), stringToNode(splitString[1])));
+            astNodes.add(new EquationAstNodePower("^", stringToNode(splitString[0]), stringToNode(splitString[1])));
             powerMatcher.reset();
             powerMatcher = powerPattern.matcher(equationBodyString);
             ++replacementIndex;
@@ -128,16 +128,14 @@ public class EquationBodyParser {
         Matcher multMatcher = multiplyPattern.matcher(equationBodyString);
         while (multMatcher.find()) {
             String match = equationBodyString.substring(multMatcher.start(), multMatcher.end());
-            String operator;
-            if (match.contains("*")) {
-                operator = "*";
-            } else {
-                operator = "/";
-            }
-
             String[] splitString = match.split("\\*|/");
             equationBodyString = equationBodyString.substring(0, multMatcher.start()) + "<" + replacementIndex + equationBodyString.substring(multMatcher.end());
-            astNodes.add(new EquationAstNodeBinaryOperation(operator, stringToNode(splitString[0]), stringToNode(splitString[1])));
+            if (match.contains("*")) {
+                astNodes.add(new EquationAstNodeMultiply("*", stringToNode(splitString[0]), stringToNode(splitString[1])));
+            } else {
+                astNodes.add(new EquationAstNodeDivide("/", stringToNode(splitString[0]), stringToNode(splitString[1])));
+            }
+
             ++replacementIndex;
             multMatcher.reset();
             multMatcher = multiplyPattern.matcher(equationBodyString);
@@ -146,19 +144,17 @@ public class EquationBodyParser {
         Matcher addMatcher = addPattern.matcher(equationBodyString);
         while (addMatcher.find()) {
             String match = equationBodyString.substring(addMatcher.start(), addMatcher.end());
-            String operator;
-            if (match.contains("+")) {
-                operator = "+";
-            } else {
-                operator = "-";
-            }
             String[] splitString = match.split("\\+|-");
             equationBodyString = equationBodyString.substring(0, addMatcher.start()) + "<" + replacementIndex + equationBodyString.substring(addMatcher.end());
-            astNodes.add(new EquationAstNodeBinaryOperation(operator, stringToNode(splitString[0]), stringToNode(splitString[1])));
+
+            if (match.contains("+")) {
+                astNodes.add(new EquationAstNodeAdd("+", stringToNode(splitString[0]), stringToNode(splitString[1])));
+            } else {
+                astNodes.add(new EquationAstNodeSubtract("-", stringToNode(splitString[0]), stringToNode(splitString[1])));
+            }
             ++replacementIndex;
             addMatcher.reset();
             addMatcher = addPattern.matcher(equationBodyString);
-
         }
 
         Matcher valueMatcher = valuePattern.matcher(equationBodyString);

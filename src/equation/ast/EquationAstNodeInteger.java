@@ -1,5 +1,7 @@
 package equation.ast;
 
+import equation.parser.exception.EquationException;
+
 public class EquationAstNodeInteger extends EquationAstNode {
 
     private final int valueOfNode;
@@ -12,5 +14,15 @@ public class EquationAstNodeInteger extends EquationAstNode {
     @Override
     public String toString() {
         return Integer.toString(valueOfNode);
+    }
+
+    @Override
+    public double evaluate() throws EquationException {
+        return valueOfNode;
+    }
+
+    @Override
+    public void simplify() throws EquationException {
+        return;
     }
 }

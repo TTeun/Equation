@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Vector;
 
-public class EquationAstNodePreDefinedFunction extends EquationAstNode {
+public abstract class EquationAstNodePreDefinedFunction extends EquationAstNode {
 
     public int arity;
     Vector<EquationAstNode> operands;
@@ -36,4 +36,5 @@ public class EquationAstNodePreDefinedFunction extends EquationAstNode {
         stringBuffer.append(")");
         return new String(stringBuffer);
     }
+
 }
