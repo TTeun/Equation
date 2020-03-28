@@ -1,12 +1,13 @@
-import equation.Equation;
-import equation.parser.EquationParser;
-import equation.parser.exception.EquationException;
+import eqn.Eqn;
+import eqn.parser.EqnParser;
+import eqn.parser.exception.EqnException;
 
 public class Main {
     public static void main(String[] args) {
         try {
-            Equation equation = EquationParser.parseEquation("f(x,y)= 1+1+1+1 + b + sin(9)");
-        } catch (EquationException e) {
+            Eqn equation = EqnParser.parseEquation("f(x,y)= sin(9)");
+            System.out.println(equation.evaluate());
+        } catch (EqnException e) {
             System.out.println(e.toString());
         }
     }
