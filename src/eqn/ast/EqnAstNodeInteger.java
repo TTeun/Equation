@@ -1,7 +1,5 @@
 package eqn.ast;
 
-import eqn.parser.exception.EqnException;
-
 public class EqnAstNodeInteger extends EqnAstNode {
 
     private final int valueOfNode;
@@ -17,12 +15,12 @@ public class EqnAstNodeInteger extends EqnAstNode {
     }
 
     @Override
-    public double evaluate() throws EqnException {
+    public double evaluate()  {
         return valueOfNode;
     }
 
     @Override
-    public EqnAstNode simplify() throws EqnException {
+    public EqnAstNode simplify()  {
         return this;
     }
 }

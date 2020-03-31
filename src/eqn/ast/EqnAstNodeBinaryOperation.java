@@ -7,34 +7,28 @@ public abstract class EqnAstNodeBinaryOperation extends EqnAstNode {
     protected EqnAstNode leftOperand;
     protected EqnAstNode rightOperand;
 
-    public EqnAstNodeBinaryOperation(String value, EqnAstNode leftOperand, EqnAstNode rightOperand) {
+    public EqnAstNodeBinaryOperation(String value, EqnAstNode leftOperand, EqnAstNode rightOperand, PrecedenceType precedenceType) {
         super(value, Type.BinaryOperation);
         this.leftOperand = leftOperand;
         this.rightOperand = rightOperand;
+        this.precedenceType = precedenceType;
     }
 
     @Override
     public String toString() {
-        return '(' + leftOperand.toString() + value + rightOperand.toString() + ")";
+        return (leftOperand.precedenceType.compareTo(this.precedenceType) >= 0 ? leftOperand.toString() : "(" + leftOperand.toString() + ")")
+                + value
+                + (rightOperand.precedenceType.compareTo(this.precedenceType) >= 0 ? rightOperand.toString() : "(" + rightOperand.toString() + ")");
     }
 
     @Override
     public EqnAstNode simplify() throws EqnException {
         leftOperand = leftOperand.simplify();
-        rightOperand = rightOperand.simplify();
 
-        try {
-            double lhs = leftOperand.evaluate();
-            leftOperand = new EqnAstNodeDouble(lhs);
-        } catch (EqnException e) {
-            return this;
+        if (leftOperand.type == Type.Constant && rightOperand.type == Type.Constant) {
+            return new EqnAstNodeDouble(this.evaluate());
         }
-        try {
-            double rhs = rightOperand.evaluate();
-            rightOperand = new EqnAstNodeDouble(rhs);
-        } catch (EqnException e) {
-            return this;
-        }
-        return new EqnAstNodeDouble(this.evaluate());
+        return this;
     }
+
 }

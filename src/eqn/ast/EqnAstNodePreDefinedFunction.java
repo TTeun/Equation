@@ -11,13 +11,13 @@ public abstract class EqnAstNodePreDefinedFunction extends EqnAstNode {
 
     public EqnAstNodePreDefinedFunction(String value) {
         super(value, Type.PreDefinedFunction);
-        operands = new Vector<EqnAstNode>(0);
+        operands = new Vector<>(0);
     }
 
 
     public EqnAstNodePreDefinedFunction(String value, int arity) {
         super(value, EqnAstNode.Type.CustomFunction);
-        operands = new Vector<EqnAstNode>(0);
+        operands = new Vector<>(0);
         this.arity = arity;
     }
 

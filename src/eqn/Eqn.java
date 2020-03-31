@@ -13,6 +13,7 @@ public class Eqn {
         this.equationHead = equationHead;
         this.equationAst = equationAst;
         this.equationAst.simplify();
+
         System.out.println("Equation created:");
         System.out.println("\t" + equationHead.toString());
         System.out.println("\t" + equationAst.toString());

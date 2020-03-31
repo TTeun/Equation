@@ -8,7 +8,7 @@ import eqn.parser.exception.EqnException;
 public class EqnAstNodeMultiply extends EqnAstNodeBinaryOperation {
 
     public EqnAstNodeMultiply(String value, EqnAstNode leftOperand, EqnAstNode rightOperand) {
-        super(value, leftOperand, rightOperand);
+        super(value, leftOperand, rightOperand,PrecedenceType.Multiplication);
     }
 
     @Override

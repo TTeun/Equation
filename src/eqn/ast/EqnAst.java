@@ -12,11 +12,8 @@ public class EqnAst {
 
     public void simplify() throws EqnException {
         root = root.simplify();
-        try {
-            double val = root.evaluate();
-            root = new EqnAstNodeDouble(val);
-        } catch (EqnException e) {
-
+        if (root.type == EqnAstNode.Type.Constant) {
+            root = new EqnAstNodeDouble(Double.parseDouble(root.value));
         }
     }
 

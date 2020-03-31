@@ -24,6 +24,7 @@ public class EqnAstNodeCustomUnaryFunction extends EqnAstNode {
 
     @Override
     public EqnAstNode simplify() throws EqnException {
-        throw new EqnException("Unary custom function simplify not yet implemented (make this class abstract)!");
+        operand = operand.simplify();
+        return this;
     }
 }

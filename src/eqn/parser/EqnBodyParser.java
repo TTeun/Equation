@@ -11,25 +11,24 @@ import java.util.regex.Pattern;
 
 public class EqnBodyParser {
 
-    static private final String numberString = "(#[0-9\\.]+)";
+    static private final String numberString = "(#[0-9.]+)";
     static private final String variableString = "(\\$[a-zA-Z]+)";
-    static private final String replacedString = "(\\<[0-9]+)";
+    static private final String replacedString = "(<[0-9]+)";
     static private final String valueString = '(' + numberString + '|' + variableString + '|' + replacedString + ')';
     static private final Pattern bracketDepthPattern = Pattern.compile("\\[_[0-9]+");
     static private final Pattern FunctionDepthPattern = Pattern.compile("\\(_[0-9]+");
     static private final Pattern valuePattern = Pattern.compile(valueString);
     static private final Pattern powerPattern = Pattern.compile(valueString + "\\^" + valueString);
     static private final Pattern multiplyPattern = Pattern.compile(valueString + "(\\*|/)" + valueString);
-    static private final Pattern addPattern = Pattern.compile(valueString + "(\\+|\\-)" + valueString);
-    int replacementIndex = 0;
+    static private final Pattern addPattern = Pattern.compile(valueString + "(\\+|-)" + valueString);
+    private int replacementIndex = 0;
     private Vector<EqnAstNode> astNodes;
 
     private EqnBodyParser() {
-        astNodes = new Vector<EqnAstNode>(0);
+        astNodes = new Vector<>(0);
     }
 
     public static EqnAst parseEquationBody(String equationBodyString) throws EqnException {
-//        System.out.println(equationBodyString);
         return new EqnAst((new EqnBodyParser()).parseEquationBody_internal(equationBodyString));
     }
 
@@ -50,19 +49,19 @@ public class EqnBodyParser {
         while (equationBodyString.contains("[")) {
             int maximumBracketDepth = findMaximumDepth(equationBodyString, bracketDepthPattern);
 
-            final Matcher endOfDeepestbracketMatcher = Pattern.compile("\\]_" + maximumBracketDepth).matcher(equationBodyString);
-            if (!endOfDeepestbracketMatcher.find()) {
+            final Matcher endOfDeepestBracketMatcher = Pattern.compile("]_" + maximumBracketDepth).matcher(equationBodyString);
+            if (!endOfDeepestBracketMatcher.find()) {
                 throw new BadBodyException("Can't find end of deepest bracket!");
             }
-            String shrunkEquationBody = equationBodyString.substring(0, endOfDeepestbracketMatcher.end());
+            String shrunkEquationBody = equationBodyString.substring(0, endOfDeepestBracketMatcher.end());
             final Matcher startOfDeepestBracketMatcher = Pattern.compile("\\[_" + maximumBracketDepth).matcher(shrunkEquationBody);
             if (!startOfDeepestBracketMatcher.find()) {
                 throw new BadBodyException("Can't find start of deepest bracket!");
             }
-            String expressionInBrackets = equationBodyString.substring(startOfDeepestBracketMatcher.end(), endOfDeepestbracketMatcher.start());
+            String expressionInBrackets = equationBodyString.substring(startOfDeepestBracketMatcher.end(), endOfDeepestBracketMatcher.start());
             astNodes.add(parseEquationBody_NoBrackets_internal(expressionInBrackets));
 
-            equationBodyString = equationBodyString.substring(0, startOfDeepestBracketMatcher.start()) + '<' + replacementIndex + equationBodyString.substring(endOfDeepestbracketMatcher.end());
+            equationBodyString = equationBodyString.substring(0, startOfDeepestBracketMatcher.start()) + '<' + replacementIndex + equationBodyString.substring(endOfDeepestBracketMatcher.end());
             ++replacementIndex;
         }
         return parseEquationBody_NoBrackets_internal(equationBodyString);
@@ -125,11 +124,11 @@ public class EqnBodyParser {
                 ++replacementIndex;
             }
         }
-        Matcher multMatcher = multiplyPattern.matcher(equationBodyString);
-        while (multMatcher.find()) {
-            String match = equationBodyString.substring(multMatcher.start(), multMatcher.end());
+        Matcher multiplyMatcher = multiplyPattern.matcher(equationBodyString);
+        while (multiplyMatcher.find()) {
+            String match = equationBodyString.substring(multiplyMatcher.start(), multiplyMatcher.end());
             String[] splitString = match.split("\\*|/");
-            equationBodyString = equationBodyString.substring(0, multMatcher.start()) + "<" + replacementIndex + equationBodyString.substring(multMatcher.end());
+            equationBodyString = equationBodyString.substring(0, multiplyMatcher.start()) + "<" + replacementIndex + equationBodyString.substring(multiplyMatcher.end());
             if (match.contains("*")) {
                 astNodes.add(new EqnAstNodeMultiply("*", stringToNode(splitString[0]), stringToNode(splitString[1])));
             } else {
@@ -137,14 +136,13 @@ public class EqnBodyParser {
             }
 
             ++replacementIndex;
-            multMatcher.reset();
-            multMatcher = multiplyPattern.matcher(equationBodyString);
+            multiplyMatcher.reset();
+            multiplyMatcher = multiplyPattern.matcher(equationBodyString);
         }
 
         Matcher unaryMinusMatcher = Pattern.compile("-" + valueString).matcher(equationBodyString);
         while (unaryMinusMatcher.lookingAt()) {
             String operand = equationBodyString.substring(unaryMinusMatcher.start() + 1, unaryMinusMatcher.end());
-            System.out.println(operand);
             equationBodyString = equationBodyString.substring(0, unaryMinusMatcher.start()) + "<" + replacementIndex + equationBodyString.substring(unaryMinusMatcher.end());
             astNodes.add(new EqnAstNodeUnaryOperation("-", stringToNode(operand)));
             unaryMinusMatcher.reset();

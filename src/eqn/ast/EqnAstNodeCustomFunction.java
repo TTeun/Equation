@@ -12,13 +12,13 @@ public class EqnAstNodeCustomFunction extends EqnAstNode {
 
     public EqnAstNodeCustomFunction(String value) {
         super(value, Type.CustomFunction);
-        operands = new Vector<EqnAstNode>(0);
+        operands = new Vector<>(0);
     }
 
 
     public EqnAstNodeCustomFunction(String value, int arity) {
         super(value, Type.CustomFunction);
-        operands = new Vector<EqnAstNode>(0);
+        operands = new Vector<>(0);
         this.arity = arity;
     }
 
@@ -45,6 +45,9 @@ public class EqnAstNodeCustomFunction extends EqnAstNode {
 
     @Override
     public EqnAstNode simplify() throws EqnException {
-        throw new EqnException("Custom function simplify not yet implemented (make this class abstract)!");
+        for (int i = 0; i != arity; ++i) {
+            operands.set(i, operands.elementAt(i).simplify());
+        }
+        return this;
     }
 }

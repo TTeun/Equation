@@ -28,11 +28,9 @@ public class EqnAstNodeUnaryOperation extends EqnAstNode {
     @Override
     public EqnAstNode simplify() throws EqnException {
         operand = operand.simplify();
-        try {
-            double val = operand.evaluate();
-            return new EqnAstNodeDouble(-1.D * val);
-        } catch (EqnException e) {
-            return this;
+        if (operand.type == Type.Constant) {
+            return new EqnAstNodeDouble(this.evaluate());
         }
+        return this;
     }
 }

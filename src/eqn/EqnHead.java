@@ -11,7 +11,7 @@ public class EqnHead {
 
     public EqnHead(String functionName) {
         this.functionName = functionName;
-        this.variableNames = new Vector<String>();
+        this.variableNames = new Vector<>();
     }
 
     public void addVariableName(@NotNull String name) {

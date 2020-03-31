@@ -51,7 +51,7 @@ public class EqnPreProcessor {
         assert (pattern != null);
 
         Matcher matcher = pattern.matcher(equationString);
-        Vector<Integer> indices = new Vector<Integer>();
+        Vector<Integer> indices = new Vector<>();
         while (matcher.find()) {
             indices.add(matcher.start());
         }

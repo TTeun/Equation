@@ -19,7 +19,7 @@ public class EqnAstNodeVariable extends EqnAstNode {
     }
 
     @Override
-    public EqnAstNode simplify() throws EqnException {
+    public EqnAstNode simplify() {
         return this;
     }
 }

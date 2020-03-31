@@ -8,7 +8,7 @@ import eqn.parser.exception.EqnException;
 public class EqnAstNodePower extends EqnAstNodeBinaryOperation {
 
     public EqnAstNodePower(String value, EqnAstNode leftOperand, EqnAstNode rightOperand) {
-        super(value, leftOperand, rightOperand);
+        super(value, leftOperand, rightOperand, PrecedenceType.Power);
     }
 
     @Override
