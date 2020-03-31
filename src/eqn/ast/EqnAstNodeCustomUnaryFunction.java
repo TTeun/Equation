@@ -3,18 +3,15 @@ package eqn.ast;
 import eqn.parser.exception.EqnException;
 import org.jetbrains.annotations.NotNull;
 
-public class EqnAstNodeCustomUnaryFunction extends EqnAstNode {
+public class EqnAstNodeCustomUnaryFunction extends EqnAstNodeUnaryFunction {
 
-    protected EqnAstNode operand;
-
-    public EqnAstNodeCustomUnaryFunction(String value, @NotNull EqnAstNode equationNode) {
-        super(value, Type.CustomUnaryFunction);
-        this.operand = equationNode;
+    public EqnAstNodeCustomUnaryFunction(String value, @NotNull EqnAstNode equationNode) throws EqnException {
+        super(value, Type.CustomUnaryFunction, equationNode, PrecedenceType.Function);
     }
 
     @Override
     public String toString() {
-        return value + '(' + operand.toString() + ')';
+        return value + '(' + operand().toString() + ')';
     }
 
     @Override
@@ -24,7 +21,7 @@ public class EqnAstNodeCustomUnaryFunction extends EqnAstNode {
 
     @Override
     public EqnAstNode simplify() throws EqnException {
-        operand = operand.simplify();
+        simplifyChildren();
         return this;
     }
 }

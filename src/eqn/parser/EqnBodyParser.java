@@ -1,7 +1,6 @@
 package eqn.parser;
 
 import eqn.ast.*;
-import eqn.ast.predefined.*;
 import eqn.parser.exception.BadBodyException;
 import eqn.parser.exception.EqnException;
 
@@ -96,7 +95,7 @@ public class EqnBodyParser {
                     astNodes.add(new EqnAstNodeCustomUnaryFunction(functionName, parseEquationBody_NoBrackets_NoFunctions_internal(parameters[0])));
                 }
             } else {
-                EqnAstNodeCustomFunction equationNode = new EqnAstNodeCustomFunction(functionName, parameters.length);
+                EqnAstNodeCustomFunction equationNode = new EqnAstNodeCustomFunction(functionName);
                 for (int i = 0; i != parameters.length; ++i) {
                     equationNode.addOperand(parseEquationBody_NoBrackets_NoFunctions_internal(parameters[i]));
                 }
@@ -109,30 +108,26 @@ public class EqnBodyParser {
     }
 
     private EqnAstNode parseEquationBody_NoBrackets_NoFunctions_internal(String equationBodyString) throws EqnException {
-//        if (equationBodyString.charAt(0) == '-') {
-//            return new EqnAstNodeUnaryOperation("-", parseEquationBody_NoBrackets_NoFunctions_internal(equationBodyString.substring(1)));
-//        }
-        {
-            Matcher powerMatcher = powerPattern.matcher(equationBodyString);
-            while (powerMatcher.find()) {
-                String match = equationBodyString.substring(powerMatcher.start(), powerMatcher.end());
-                String[] splitString = match.split("\\^");
-                equationBodyString = equationBodyString.substring(0, powerMatcher.start()) + "<" + replacementIndex + equationBodyString.substring(powerMatcher.end());
-                astNodes.add(new EqnAstNodePower("^", stringToNode(splitString[0]), stringToNode(splitString[1])));
-                powerMatcher.reset();
-                powerMatcher = powerPattern.matcher(equationBodyString);
-                ++replacementIndex;
-            }
+        Matcher powerMatcher = powerPattern.matcher(equationBodyString);
+        while (powerMatcher.find()) {
+            String match = equationBodyString.substring(powerMatcher.start(), powerMatcher.end());
+            String[] splitString = match.split("\\^");
+            equationBodyString = equationBodyString.substring(0, powerMatcher.start()) + "<" + replacementIndex + equationBodyString.substring(powerMatcher.end());
+            astNodes.add(new EqnAstNodePower(stringToNode(splitString[0]), stringToNode(splitString[1])));
+            powerMatcher.reset();
+            powerMatcher = powerPattern.matcher(equationBodyString);
+            ++replacementIndex;
         }
+
         Matcher multiplyMatcher = multiplyPattern.matcher(equationBodyString);
         while (multiplyMatcher.find()) {
             String match = equationBodyString.substring(multiplyMatcher.start(), multiplyMatcher.end());
             String[] splitString = match.split("\\*|/");
             equationBodyString = equationBodyString.substring(0, multiplyMatcher.start()) + "<" + replacementIndex + equationBodyString.substring(multiplyMatcher.end());
             if (match.contains("*")) {
-                astNodes.add(new EqnAstNodeMultiply("*", stringToNode(splitString[0]), stringToNode(splitString[1])));
+                astNodes.add(new EqnAstNodeSetMultiply(stringToNode(splitString[0]), stringToNode(splitString[1])));
             } else {
-                astNodes.add(new EqnAstNodeDivide("/", stringToNode(splitString[0]), stringToNode(splitString[1])));
+                astNodes.add(new EqnAstNodeDivide(stringToNode(splitString[0]), stringToNode(splitString[1])));
             }
 
             ++replacementIndex;
@@ -144,7 +139,7 @@ public class EqnBodyParser {
         while (unaryMinusMatcher.lookingAt()) {
             String operand = equationBodyString.substring(unaryMinusMatcher.start() + 1, unaryMinusMatcher.end());
             equationBodyString = equationBodyString.substring(0, unaryMinusMatcher.start()) + "<" + replacementIndex + equationBodyString.substring(unaryMinusMatcher.end());
-            astNodes.add(new EqnAstNodeUnaryOperation("-", stringToNode(operand)));
+            astNodes.add(new EqnAstNodeUnaryMinus(stringToNode(operand)));
             unaryMinusMatcher.reset();
             unaryMinusMatcher = Pattern.compile("-" + valueString).matcher(equationBodyString);
             ++replacementIndex;
@@ -154,13 +149,13 @@ public class EqnBodyParser {
         Matcher addMatcher = addPattern.matcher(equationBodyString);
         while (addMatcher.find()) {
             String match = equationBodyString.substring(addMatcher.start(), addMatcher.end());
-            String[] splitString = match.split("\\+|-");
+            String[] splitString = match.split("[+-]");
             equationBodyString = equationBodyString.substring(0, addMatcher.start()) + "<" + replacementIndex + equationBodyString.substring(addMatcher.end());
 
             if (match.contains("+")) {
-                astNodes.add(new EqnAstNodeAdd("+", stringToNode(splitString[0]), stringToNode(splitString[1])));
+                astNodes.add(new EqnAstNodeSetAdd(stringToNode(splitString[0]), stringToNode(splitString[1])));
             } else {
-                astNodes.add(new EqnAstNodeSubtract("-", stringToNode(splitString[0]), stringToNode(splitString[1])));
+                astNodes.add(new EqnAstNodeSubtract(stringToNode(splitString[0]), stringToNode(splitString[1])));
             }
             ++replacementIndex;
             addMatcher.reset();
@@ -173,7 +168,6 @@ public class EqnBodyParser {
         } else {
             throw new BadBodyException("Couldn't resolve bracket-less and function-less expression");
         }
-
     }
 
     private EqnAstNode stringToNode(String nodeString) throws BadBodyException {
@@ -181,17 +175,13 @@ public class EqnBodyParser {
             case '$':
                 return new EqnAstNodeVariable(nodeString.substring(1));
             case '#':
-                if (nodeString.contains(".")) {
-                    return new EqnAstNodeDouble(nodeString.substring(1));
-                }
-                return new EqnAstNodeInteger(nodeString.substring(1));
+                return new EqnAstNodeDouble(nodeString.substring(1));
             case '<':
                 int indexOfNode = Integer.parseInt(nodeString.substring(1));
                 if (astNodes.elementAt(indexOfNode) == null) {
                     throw new BadBodyException("astNodes at index is null, shouldn't happen!");
                 }
                 return astNodes.elementAt(indexOfNode);
-
         }
         throw new BadBodyException("Unexpected symbol");
     }

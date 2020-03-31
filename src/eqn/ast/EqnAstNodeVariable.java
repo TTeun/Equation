@@ -5,7 +5,7 @@ import eqn.parser.exception.EqnException;
 public class EqnAstNodeVariable extends EqnAstNode {
 
     public EqnAstNodeVariable(String value) {
-        super(value, Type.Variable);
+        super(value, Type.Variable, PrecedenceType.Terminal);
     }
 
     @Override

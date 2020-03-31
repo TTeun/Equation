@@ -4,16 +4,16 @@ import eqn.parser.exception.EqnException;
 
 import java.util.Vector;
 
-public class EqnAstNodeSetAdd extends EqnAstNode {
+public class EqnAstNodeSetMultiply extends EqnAstNode {
 
-    double constantOperand = 0.0D;
+    double constantOperand = 1.0D;
 
-    public EqnAstNodeSetAdd() {
-        super("Add", Type.Addition, PrecedenceType.Addition);
+    public EqnAstNodeSetMultiply() {
+        super("Add", Type.Multiplication, PrecedenceType.Multiplication);
     }
 
-    public EqnAstNodeSetAdd(EqnAstNode left, EqnAstNode right) throws EqnException {
-        super("Add", Type.Addition, PrecedenceType.Addition);
+    public EqnAstNodeSetMultiply(EqnAstNode left, EqnAstNode right) throws EqnException {
+        super("Add", Type.Multiplication, PrecedenceType.Multiplication);
         addOperand(left);
         addOperand(right);
     }
@@ -24,9 +24,9 @@ public class EqnAstNodeSetAdd extends EqnAstNode {
 
     public void addOperand(EqnAstNode eqnAstNode) throws EqnException {
         if (eqnAstNode.type == Type.Constant) {
-            constantOperand += eqnAstNode.evaluate();
-        } else if (eqnAstNode.type == Type.Addition) {
-            constantOperand += eqnAstNode.getConstant();
+            constantOperand *= eqnAstNode.evaluate();
+        } else if (eqnAstNode.type == Type.Multiplication) {
+            constantOperand *= eqnAstNode.getConstant();
             for (int i = 0; i != eqnAstNode.operands.size(); ++i) {
                 addOperand(eqnAstNode.operands.elementAt(i));
             }
@@ -39,23 +39,22 @@ public class EqnAstNodeSetAdd extends EqnAstNode {
     public double evaluate() throws EqnException {
         double result = constantOperand;
         for (int i = 0; i != operands.size(); ++i) {
-            result += operands.elementAt(i).evaluate();
+            result *= operands.elementAt(i).evaluate();
         }
         return result;
     }
 
     @Override
     public String toString() {
-        StringBuffer stringBuffer = new StringBuffer(constantOperand == 0.0D ? "" : constantOperand + "+");
+        StringBuffer stringBuffer = new StringBuffer(constantOperand == 1.0D ? "" : constantOperand + "*");
         if (operands.size() != 0) {
             for (int i = 0; i < operands.size(); ++i) {
-                stringBuffer.append(operands.elementAt(i).toString() + "+");
+                stringBuffer.append(operands.elementAt(i).toString() + "*");
             }
         }
         if (stringBuffer.length() > 0) {
             stringBuffer.setLength(stringBuffer.length() - 1);
         }
-
         return new String(stringBuffer);
     }
 
@@ -67,7 +66,7 @@ public class EqnAstNodeSetAdd extends EqnAstNode {
         Vector<EqnAstNode> updatedOperands = new Vector<>();
         for (int i = 0; i != operands.size(); ++i) {
             if (operands.elementAt(i).type == Type.Constant) {
-                constantOperand += operands.elementAt(i).evaluate();
+                constantOperand *= operands.elementAt(i).evaluate();
             } else {
                 updatedOperands.add(operands.elementAt(i));
             }

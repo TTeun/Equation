@@ -4,31 +4,34 @@ import eqn.parser.exception.EqnException;
 
 public abstract class EqnAstNodeBinaryOperation extends EqnAstNode {
 
-    protected EqnAstNode leftOperand;
-    protected EqnAstNode rightOperand;
+    public EqnAstNodeBinaryOperation(String value, EqnAstNode leftOperand, EqnAstNode rightOperand, PrecedenceType precedenceType) throws EqnException {
+        super(value, Type.BinaryOperation, precedenceType);
+        addOperand(leftOperand);
+        addOperand(rightOperand);
+    }
 
-    public EqnAstNodeBinaryOperation(String value, EqnAstNode leftOperand, EqnAstNode rightOperand, PrecedenceType precedenceType) {
-        super(value, Type.BinaryOperation);
-        this.leftOperand = leftOperand;
-        this.rightOperand = rightOperand;
-        this.precedenceType = precedenceType;
+    EqnAstNode left() {
+        return getNodeAt(0);
+    }
+
+    EqnAstNode right() {
+        return getNodeAt(1);
     }
 
     @Override
     public String toString() {
-        return (leftOperand.precedenceType.compareTo(this.precedenceType) >= 0 ? leftOperand.toString() : "(" + leftOperand.toString() + ")")
+        return (left().precedenceType.compareTo(this.precedenceType) >= 0 ? left().toString() : "(" + left().toString() + ")")
                 + value
-                + (rightOperand.precedenceType.compareTo(this.precedenceType) >= 0 ? rightOperand.toString() : "(" + rightOperand.toString() + ")");
+                + (right().precedenceType.compareTo(this.precedenceType) >= 0 ? right().toString() : "(" + right().toString() + ")");
     }
 
     @Override
     public EqnAstNode simplify() throws EqnException {
-        leftOperand = leftOperand.simplify();
+        simplifyChildren();
 
-        if (leftOperand.type == Type.Constant && rightOperand.type == Type.Constant) {
+        if (left().type == Type.Constant && right().type == Type.Constant) {
             return new EqnAstNodeDouble(this.evaluate());
         }
         return this;
     }
-
 }

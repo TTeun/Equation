@@ -1,24 +1,16 @@
 package eqn.ast;
 
-import eqn.parser.exception.EqnException;
-import org.jetbrains.annotations.NotNull;
+abstract public class EqnAstNodeFunction extends EqnAstNode {
+    public EqnAstNodeFunction(PrecedenceType precedenceType) {
+        super(precedenceType);
+    }
 
-import java.util.Vector;
-
-public abstract class EqnAstNodePreDefinedFunction extends EqnAstNode {
-
-
-    public EqnAstNodePreDefinedFunction(String value) {
-        super(value, Type.PreDefinedFunction, PrecedenceType.Function);
-        operands = new Vector<>(0);
+    public EqnAstNodeFunction(String value, Type type, PrecedenceType precedenceType) {
+        super(value, type, precedenceType);
     }
 
     protected int arity() {
         return operands.size();
-    }
-
-    public void addOperand(@NotNull EqnAstNode operand) throws EqnException {
-        this.operands.add(operand);
     }
 
     @Override
@@ -32,5 +24,4 @@ public abstract class EqnAstNodePreDefinedFunction extends EqnAstNode {
         stringBuffer.append(")");
         return new String(stringBuffer);
     }
-
 }

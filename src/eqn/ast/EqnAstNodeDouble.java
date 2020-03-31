@@ -2,15 +2,15 @@ package eqn.ast;
 
 public class EqnAstNodeDouble extends EqnAstNode {
 
-    private final double valueOfNode;
+    private double valueOfNode;
 
     public EqnAstNodeDouble(String value) {
-        super(value, Type.Constant);
+        super(value, Type.Constant, PrecedenceType.Terminal);
         valueOfNode = Double.parseDouble(value);
     }
 
     public EqnAstNodeDouble(Double value) {
-        super(Double.toString(value), Type.Constant);
+        super(Double.toString(value), Type.Constant, PrecedenceType.Terminal);
         valueOfNode = value;
     }
 
@@ -28,8 +28,6 @@ public class EqnAstNodeDouble extends EqnAstNode {
     public EqnAstNode simplify() {
         return this;
     }
-
-
 }
 
 
