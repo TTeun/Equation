@@ -1,11 +1,8 @@
 package eqn.ast
 
 import eqn.parser.exception.EqnException
-import java.util.*
 
-class EqnAstNodeAdd() : EqnAstNodeArbitraryArity("Add", Type.Addition, PrecedenceType.Addition) {
-    private var constant = 0.0
-
+class EqnAstNodeAdd(private var constant: Double = 0.0) : EqnAstNodeArbitraryArity("Add", Type.Addition, PrecedenceType.Addition) {
     override fun getConstantValue() = constant
 
     constructor(left: EqnAstNode, right: EqnAstNode) : this() {
@@ -55,7 +52,7 @@ class EqnAstNodeAdd() : EqnAstNodeArbitraryArity("Add", Type.Addition, Precedenc
         for (i in operands.indices) {
             operands[i] = operands.elementAt(i).simplify()
         }
-        val updatedOperands = Vector<EqnAstNode>()
+        val updatedOperands = ArrayList<EqnAstNode>()
         for (i in operands.indices) {
             if (operands.elementAt(i).type == Type.Constant) {
                 constant += operands.elementAt(i).evaluate()

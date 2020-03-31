@@ -3,14 +3,12 @@ package eqn.ast
 import eqn.ast.EqnAstNode
 import eqn.parser.exception.EqnException
 
-class EqnAst(root: EqnAstNode) {
-    private var root: EqnAstNode?
-
+class EqnAst(private var root: EqnAstNode) {
     @Throws(EqnException::class)
     fun simplify() {
-        root = root!!.simplify()
-        if (root!!.type == EqnAstNode.Type.Constant) {
-            root = EqnAstNodeDouble(root!!.value.toDouble())
+        root = root.simplify()
+        if (root.type == EqnAstNode.Type.Constant) {
+            root = EqnAstNodeDouble(root.value.toDouble())
         }
     }
 
@@ -21,11 +19,5 @@ class EqnAst(root: EqnAstNode) {
     }
 
     @Throws(EqnException::class)
-    fun evaluate(): Double {
-        return root!!.evaluate()
-    }
-
-    init {
-        this.root = root
-    }
+    fun evaluate(): Double = root.evaluate()
 }

@@ -1,9 +1,8 @@
 package eqn.ast
 
 import java.security.InvalidParameterException
-import java.util.*
 
-abstract class EqnAstNodeArbitraryArity(value: String, type: Type, precedenceType: PrecedenceType, protected var operands: Vector<EqnAstNode> = Vector())
+abstract class EqnAstNodeArbitraryArity(value: String, type: Type, precedenceType: PrecedenceType, protected var operands: ArrayList<EqnAstNode> = ArrayList())
     : EqnAstNode(value, type, precedenceType) {
 
     override fun getConstantValue(): Double {
@@ -19,12 +18,12 @@ abstract class EqnAstNodeArbitraryArity(value: String, type: Type, precedenceTyp
 
     override fun simplifyChildren() {
         for (i in operands.indices) {
-            operands.setElementAt(operands[i].simplify(), i)
+            operands[i] = operands[i].simplify()
         }
     }
 
     override fun addOperand(operand: EqnAstNode) {
-        operands.addElement(operand)
+        operands.add(operand)
     }
 
     override fun arity() = operands.size

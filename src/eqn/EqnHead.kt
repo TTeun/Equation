@@ -1,9 +1,6 @@
 package eqn
 
-import java.util.*
-
-class EqnHead(private val functionName: String) {
-    private val variableNames: Vector<String> = Vector()
+class EqnHead(private val functionName: String, private val variableNames: ArrayList<String> = ArrayList()) {
     fun addVariableName(name: String) {
         variableNames.add(name)
     }
@@ -14,5 +11,4 @@ class EqnHead(private val functionName: String) {
                 ", variableNames=" + variableNames +
                 '}'
     }
-
 }

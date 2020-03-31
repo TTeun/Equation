@@ -13,7 +13,7 @@ class EqnBodyParser private constructor() {
     private var replacementIndex = 0
 
     @Throws(EqnException::class)
-    private fun parseEquationbodyInternal(equationBodyString: String): EqnAstNode? {
+    private fun parseEquationBodyInternal(equationBodyString: String): EqnAstNode? {
         var equationBodyString = equationBodyString
         while (equationBodyString.contains("[")) {
             val maximumBracketDepth = findMaximumDepth(equationBodyString, bracketDepthPattern)
@@ -27,15 +27,15 @@ class EqnBodyParser private constructor() {
                 throw BadBodyException("Can't find start of deepest bracket!")
             }
             val expressionInBrackets = equationBodyString.substring(startOfDeepestBracketMatcher.end(), endOfDeepestBracketMatcher.start())
-            astNodes.add(parseEquationBody_NoBrackets_internal(expressionInBrackets))
+            astNodes.add(parseEquationBodyNoBracketsInternal(expressionInBrackets))
             equationBodyString = equationBodyString.substring(0, startOfDeepestBracketMatcher.start()) + '<' + replacementIndex + equationBodyString.substring(endOfDeepestBracketMatcher.end())
             ++replacementIndex
         }
-        return parseEquationBody_NoBrackets_internal(equationBodyString)
+        return parseEquationBodyNoBracketsInternal(equationBodyString)
     }
 
     @Throws(EqnException::class)
-    private fun parseEquationBody_NoBrackets_internal(equationBodyString: String): EqnAstNode? {
+    private fun parseEquationBodyNoBracketsInternal(equationBodyString: String): EqnAstNode? {
         var equationBodyString = equationBodyString
         while (equationBodyString.contains("@")) {
             val maximumFunctionDepth = findMaximumDepth(equationBodyString, FunctionDepthPattern)
@@ -57,25 +57,25 @@ class EqnBodyParser private constructor() {
             val parameters = equationBodyString.substring(startOfDeepestFunctionMatcher.end(), endOfDeepestFunctionMatcher.start()).split(",".toRegex()).toTypedArray()
             if (parameters.size == 1) {
                 if (Pattern.compile("sin|cos|tan|exp").matcher(functionName).matches()) {
-                    astNodes.add(create(functionName, parseEquationBody_NoBrackets_NoFunctions_internal(parameters[0])!!))
+                    astNodes.add(create(functionName, parseEquationBodyNoBracketsNoFunctionsInternal(parameters[0])!!))
                 } else {
-                    astNodes.add(EqnAstNodeCustomUnaryFunction(functionName, parseEquationBody_NoBrackets_NoFunctions_internal(parameters[0])!!))
+                    astNodes.add(EqnAstNodeCustomUnaryFunction(functionName, parseEquationBodyNoBracketsNoFunctionsInternal(parameters[0])!!))
                 }
             } else {
                 val equationNode = EqnAstNodeCustomFunction(functionName)
                 for (i in parameters.indices) {
-                    equationNode.addOperand(parseEquationBody_NoBrackets_NoFunctions_internal(parameters[i])!!)
+                    equationNode.addOperand(parseEquationBodyNoBracketsNoFunctionsInternal(parameters[i])!!)
                 }
                 astNodes.add(equationNode)
             }
             equationBodyString = equationBodyString.substring(0, startOfDeepestFunctionMatcher.start()) + '<' + replacementIndex + equationBodyString.substring(endOfDeepestFunctionMatcher.end())
             ++replacementIndex
         }
-        return parseEquationBody_NoBrackets_NoFunctions_internal(equationBodyString)
+        return parseEquationBodyNoBracketsNoFunctionsInternal(equationBodyString)
     }
 
     @Throws(EqnException::class)
-    private fun parseEquationBody_NoBrackets_NoFunctions_internal(equationBodyString: String): EqnAstNode? {
+    private fun parseEquationBodyNoBracketsNoFunctionsInternal(equationBodyString: String): EqnAstNode? {
         var equationBodyString = equationBodyString
         var powerMatcher = powerPattern.matcher(equationBodyString)
         while (powerMatcher.find()) {
@@ -162,7 +162,7 @@ class EqnBodyParser private constructor() {
 
         @Throws(EqnException::class)
         fun parseEquationBody(equationBodyString: String): EqnAst {
-            return EqnAst(EqnBodyParser().parseEquationbodyInternal(equationBodyString)!!)
+            return EqnAst(EqnBodyParser().parseEquationBodyInternal(equationBodyString)!!)
         }
 
         @Throws(EqnException::class)

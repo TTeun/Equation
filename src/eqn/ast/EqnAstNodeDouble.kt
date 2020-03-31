@@ -3,11 +3,9 @@ package eqn.ast
 class EqnAstNodeDouble : EqnAstNode {
     private var valueOfNode: Double
 
-
     override fun getConstantValue(): Double {
         throw UnsupportedOperationException("getConstantValue in EqnAstNodeDouble not supported")
     }
-
 
     constructor(value: String) : super(value, Type.Constant, PrecedenceType.Terminal) {
         valueOfNode = value.toDouble()

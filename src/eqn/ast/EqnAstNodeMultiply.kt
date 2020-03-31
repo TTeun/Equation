@@ -1,10 +1,8 @@
 package eqn.ast
 
 import eqn.parser.exception.EqnException
-import java.util.*
 
-class EqnAstNodeMultiply() : EqnAstNodeArbitraryArity("Add", Type.Multiplication, PrecedenceType.Multiplication) {
-    private var constant: Double = 1.0
+class EqnAstNodeMultiply(private var constant: Double = 1.0) : EqnAstNodeArbitraryArity("Add", Type.Multiplication, PrecedenceType.Multiplication) {
 
     override fun getConstantValue() = constant
 
@@ -58,7 +56,7 @@ class EqnAstNodeMultiply() : EqnAstNodeArbitraryArity("Add", Type.Multiplication
         for (i in operands.indices) {
             operands[i] = operands.elementAt(i).simplify()
         }
-        val updatedOperands = Vector<EqnAstNode>()
+        val updatedOperands = ArrayList<EqnAstNode>()
         for (i in operands.indices) {
             if (operands.elementAt(i).type == Type.Constant) {
                 constant *= operands.elementAt(i).evaluate()
@@ -71,19 +69,4 @@ class EqnAstNodeMultiply() : EqnAstNodeArbitraryArity("Add", Type.Multiplication
             EqnAstNodeDouble(constant)
         } else this
     }
-
-//    private fun simplifyToFraction(): EqnAstNodeDivide {
-//        val numerator = EqnAstNodeMultiply()
-//        val denominator = EqnAstNodeMultiply()
-//
-//        for (i in operands.indices) {
-//            if (operands[i].type == Type.Division) {
-//                denominator.addOperand(operands[i])
-//            } else {
-//                numerator.addOperand(operands[i])
-//            }
-//        }
-//
-//        return EqnAstNodeDivide(numerator, denominator)
-//    }
 }
