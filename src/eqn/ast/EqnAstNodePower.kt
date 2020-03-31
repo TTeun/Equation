@@ -3,25 +3,26 @@ package eqn.ast
 import eqn.parser.exception.EqnException
 import kotlin.math.pow
 
-class EqnAstNodePower(leftOperand: EqnAstNode?, rightOperand: EqnAstNode?) : EqnAstNodeBinaryOperation("^", leftOperand, rightOperand, PrecedenceType.Power, Type.Power) {
+class EqnAstNodePower(leftOperand: EqnAstNode, rightOperand: EqnAstNode) : EqnAstNodeBinary("^", Type.Power, PrecedenceType.Power, leftOperand, rightOperand) {
+
     @Throws(EqnException::class)
     override fun evaluate(): Double {
-        return left()!!.evaluate().pow(right()!!.evaluate())
+        return left.evaluate().pow(right.evaluate())
     }
 
     @Throws(EqnException::class)
-    override fun simplify(): EqnAstNode? {
+    override fun simplify(): EqnAstNode {
         simplifyChildren()
-        if (right()!!.type == Type.Constant) {
-            if (right()!!.value.toDouble() == 0.0) {
+        if (right.type == Type.Constant) {
+            if (right.value.toDouble() == 0.0) {
                 return EqnAstNodeDouble(1.0)
             }
-            if (right()!!.value.toDouble() == 1.0) {
-                return left()
+            if (right.value.toDouble() == 1.0) {
+                return left
             }
         }
-        if (left()!!.type == Type.Constant) {
-            if (left()!!.value.toDouble() == 1.0) {
+        if (left.type == Type.Constant) {
+            if (left.value.toDouble() == 1.0) {
                 return EqnAstNodeDouble(1.0)
             }
         }

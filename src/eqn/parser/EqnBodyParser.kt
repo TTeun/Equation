@@ -1,188 +1,183 @@
-package eqn.parser;
+package eqn.parser
 
-import eqn.ast.*;
-import eqn.parser.exception.BadBodyException;
-import eqn.parser.exception.EqnException;
+import eqn.ast.*
+import eqn.ast.EqnAstNodeUnary.Companion.create
+import eqn.parser.exception.BadBodyException
+import eqn.parser.exception.EqnException
+import java.util.*
+import java.util.regex.Pattern
+import kotlin.math.max
 
-import java.util.Vector;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+class EqnBodyParser private constructor() {
+    private val astNodes: Vector<EqnAstNode?> = Vector(0)
+    private var replacementIndex = 0
 
-public class EqnBodyParser {
-
-    static private final String numberString = "(#[0-9.]+)";
-    static private final String variableString = "(\\$[a-zA-Z]+)";
-    static private final String replacedString = "(<[0-9]+)";
-    static private final String valueString = '(' + numberString + '|' + variableString + '|' + replacedString + ')';
-    static private final Pattern bracketDepthPattern = Pattern.compile("\\[_[0-9]+");
-    static private final Pattern FunctionDepthPattern = Pattern.compile("\\(_[0-9]+");
-    static private final Pattern valuePattern = Pattern.compile(valueString);
-    static private final Pattern powerPattern = Pattern.compile(valueString + "\\^" + valueString);
-    static private final Pattern multiplyPattern = Pattern.compile(valueString + "[*/]" + valueString);
-    static private final Pattern addPattern = Pattern.compile(valueString + "[+-]" + valueString);
-    private final Vector<EqnAstNode> astNodes;
-    private int replacementIndex = 0;
-
-    private EqnBodyParser() {
-        astNodes = new Vector<>(0);
-    }
-
-    public static EqnAst parseEquationBody(String equationBodyString) throws EqnException {
-        return new EqnAst((new EqnBodyParser()).parseEquationBody_internal(equationBodyString));
-    }
-
-    static private int findMaximumDepth(String equationBodyString, Pattern pattern) throws EqnException {
-        int maximumBracketDepthSoFar = 0;
-        Matcher bracketDepthMatcher = pattern.matcher(equationBodyString);
-        while (bracketDepthMatcher.find()) {
-            try {
-                maximumBracketDepthSoFar = Math.max(maximumBracketDepthSoFar, Integer.parseInt(bracketDepthMatcher.group().substring(2)));
-            } catch (Exception e) {
-                throw new EqnException("Could not convert bracket depth identifier to int", new BadBodyException(e));
-            }
-        }
-        return maximumBracketDepthSoFar;
-    }
-
-    private EqnAstNode parseEquationBody_internal(String equationBodyString) throws EqnException {
+    @Throws(EqnException::class)
+    private fun parseEquationbodyInternal(equationBodyString: String): EqnAstNode? {
+        var equationBodyString = equationBodyString
         while (equationBodyString.contains("[")) {
-            int maximumBracketDepth = findMaximumDepth(equationBodyString, bracketDepthPattern);
-
-            final Matcher endOfDeepestBracketMatcher = Pattern.compile("]_" + maximumBracketDepth).matcher(equationBodyString);
+            val maximumBracketDepth = findMaximumDepth(equationBodyString, bracketDepthPattern)
+            val endOfDeepestBracketMatcher = Pattern.compile("]_$maximumBracketDepth").matcher(equationBodyString)
             if (!endOfDeepestBracketMatcher.find()) {
-                throw new BadBodyException("Can't find end of deepest bracket!");
+                throw BadBodyException("Can't find end of deepest bracket!")
             }
-            String shrunkEquationBody = equationBodyString.substring(0, endOfDeepestBracketMatcher.end());
-            final Matcher startOfDeepestBracketMatcher = Pattern.compile("\\[_" + maximumBracketDepth).matcher(shrunkEquationBody);
+            val shrunkEquationBody = equationBodyString.substring(0, endOfDeepestBracketMatcher.end())
+            val startOfDeepestBracketMatcher = Pattern.compile("\\[_$maximumBracketDepth").matcher(shrunkEquationBody)
             if (!startOfDeepestBracketMatcher.find()) {
-                throw new BadBodyException("Can't find start of deepest bracket!");
+                throw BadBodyException("Can't find start of deepest bracket!")
             }
-            String expressionInBrackets = equationBodyString.substring(startOfDeepestBracketMatcher.end(), endOfDeepestBracketMatcher.start());
-            astNodes.add(parseEquationBody_NoBrackets_internal(expressionInBrackets));
-
-            equationBodyString = equationBodyString.substring(0, startOfDeepestBracketMatcher.start()) + '<' + replacementIndex + equationBodyString.substring(endOfDeepestBracketMatcher.end());
-            ++replacementIndex;
+            val expressionInBrackets = equationBodyString.substring(startOfDeepestBracketMatcher.end(), endOfDeepestBracketMatcher.start())
+            astNodes.add(parseEquationBody_NoBrackets_internal(expressionInBrackets))
+            equationBodyString = equationBodyString.substring(0, startOfDeepestBracketMatcher.start()) + '<' + replacementIndex + equationBodyString.substring(endOfDeepestBracketMatcher.end())
+            ++replacementIndex
         }
-        return parseEquationBody_NoBrackets_internal(equationBodyString);
+        return parseEquationBody_NoBrackets_internal(equationBodyString)
     }
 
-
-    private EqnAstNode parseEquationBody_NoBrackets_internal(String equationBodyString) throws EqnException {
+    @Throws(EqnException::class)
+    private fun parseEquationBody_NoBrackets_internal(equationBodyString: String): EqnAstNode? {
+        var equationBodyString = equationBodyString
         while (equationBodyString.contains("@")) {
-            int maximumFunctionDepth = findMaximumDepth(equationBodyString, FunctionDepthPattern);
-
-            final Matcher endOfDeepestFunctionMatcher = Pattern.compile("@[a-zA-Z]+\\)_" + maximumFunctionDepth).matcher(equationBodyString);
+            val maximumFunctionDepth = findMaximumDepth(equationBodyString, FunctionDepthPattern)
+            val endOfDeepestFunctionMatcher = Pattern.compile("@[a-zA-Z]+\\)_$maximumFunctionDepth").matcher(equationBodyString)
             if (!endOfDeepestFunctionMatcher.find()) {
-                throw new BadBodyException("Can't find end of deepest function!");
+                throw BadBodyException("Can't find end of deepest function!")
             }
-            String shrunkEquationBody = equationBodyString.substring(0, endOfDeepestFunctionMatcher.end());
-            final Matcher startOfDeepestFunctionMatcher = Pattern.compile("@[a-zA-Z]+\\(_" + maximumFunctionDepth).matcher(shrunkEquationBody);
+            var shrunkEquationBody = equationBodyString.substring(0, endOfDeepestFunctionMatcher.end())
+            val startOfDeepestFunctionMatcher = Pattern.compile("@[a-zA-Z]+\\(_$maximumFunctionDepth").matcher(shrunkEquationBody)
             if (!startOfDeepestFunctionMatcher.find()) {
-                throw new BadBodyException("Can't find start of deepest function!");
+                throw BadBodyException("Can't find start of deepest function!")
             }
-            shrunkEquationBody = equationBodyString.substring(startOfDeepestFunctionMatcher.start(), endOfDeepestFunctionMatcher.end());
-            final Matcher functionNameMatcher = Pattern.compile("[a-zA-Z]+").matcher(shrunkEquationBody);
+            shrunkEquationBody = equationBodyString.substring(startOfDeepestFunctionMatcher.start(), endOfDeepestFunctionMatcher.end())
+            val functionNameMatcher = Pattern.compile("[a-zA-Z]+").matcher(shrunkEquationBody)
             if (!functionNameMatcher.find()) {
-                throw new BadBodyException("Can't find function name!");
+                throw BadBodyException("Can't find function name!")
             }
-            String functionName = functionNameMatcher.group();
-            String[] parameters = equationBodyString.substring(startOfDeepestFunctionMatcher.end(), endOfDeepestFunctionMatcher.start()).split(",");
-
-            if (parameters.length == 1) {
+            val functionName = functionNameMatcher.group()
+            val parameters = equationBodyString.substring(startOfDeepestFunctionMatcher.end(), endOfDeepestFunctionMatcher.start()).split(",".toRegex()).toTypedArray()
+            if (parameters.size == 1) {
                 if (Pattern.compile("sin|cos|tan|exp").matcher(functionName).matches()) {
-                    astNodes.add(EqnAstNodePreDefinedUnaryFunction.create(functionName, parseEquationBody_NoBrackets_NoFunctions_internal(parameters[0])));
+                    astNodes.add(create(functionName, parseEquationBody_NoBrackets_NoFunctions_internal(parameters[0])!!))
                 } else {
-                    astNodes.add(new EqnAstNodeCustomUnaryFunction(functionName, parseEquationBody_NoBrackets_NoFunctions_internal(parameters[0])));
+                    astNodes.add(EqnAstNodeCustomUnaryFunction(functionName, parseEquationBody_NoBrackets_NoFunctions_internal(parameters[0])!!))
                 }
             } else {
-                EqnAstNodeCustomFunction equationNode = new EqnAstNodeCustomFunction(functionName);
-                for (int i = 0; i != parameters.length; ++i) {
-                    equationNode.addOperand(parseEquationBody_NoBrackets_NoFunctions_internal(parameters[i]));
+                val equationNode = EqnAstNodeCustomFunction(functionName)
+                for (i in parameters.indices) {
+                    equationNode.addOperand(parseEquationBody_NoBrackets_NoFunctions_internal(parameters[i])!!)
                 }
-                astNodes.add(equationNode);
+                astNodes.add(equationNode)
             }
-            equationBodyString = equationBodyString.substring(0, startOfDeepestFunctionMatcher.start()) + '<' + replacementIndex + equationBodyString.substring(endOfDeepestFunctionMatcher.end());
-            ++replacementIndex;
+            equationBodyString = equationBodyString.substring(0, startOfDeepestFunctionMatcher.start()) + '<' + replacementIndex + equationBodyString.substring(endOfDeepestFunctionMatcher.end())
+            ++replacementIndex
         }
-        return parseEquationBody_NoBrackets_NoFunctions_internal(equationBodyString);
+        return parseEquationBody_NoBrackets_NoFunctions_internal(equationBodyString)
     }
 
-    private EqnAstNode parseEquationBody_NoBrackets_NoFunctions_internal(String equationBodyString) throws EqnException {
-        Matcher powerMatcher = powerPattern.matcher(equationBodyString);
+    @Throws(EqnException::class)
+    private fun parseEquationBody_NoBrackets_NoFunctions_internal(equationBodyString: String): EqnAstNode? {
+        var equationBodyString = equationBodyString
+        var powerMatcher = powerPattern.matcher(equationBodyString)
         while (powerMatcher.find()) {
-            String match = equationBodyString.substring(powerMatcher.start(), powerMatcher.end());
-            String[] splitString = match.split("\\^");
-            equationBodyString = equationBodyString.substring(0, powerMatcher.start()) + "<" + replacementIndex + equationBodyString.substring(powerMatcher.end());
-            astNodes.add(new EqnAstNodePower(stringToNode(splitString[0]), stringToNode(splitString[1])));
-            powerMatcher.reset();
-            powerMatcher = powerPattern.matcher(equationBodyString);
-            ++replacementIndex;
+            val match = equationBodyString.substring(powerMatcher.start(), powerMatcher.end())
+            val splitString = match.split("\\^".toRegex()).toTypedArray()
+            equationBodyString = equationBodyString.substring(0, powerMatcher.start()) + "<" + replacementIndex + equationBodyString.substring(powerMatcher.end())
+            astNodes.add(EqnAstNodePower(stringToNode(splitString[0])!!, stringToNode(splitString[1])!!))
+            powerMatcher.reset()
+            powerMatcher = powerPattern.matcher(equationBodyString)
+            ++replacementIndex
         }
-
-        Matcher multiplyMatcher = multiplyPattern.matcher(equationBodyString);
+        var multiplyMatcher = multiplyPattern.matcher(equationBodyString)
         while (multiplyMatcher.find()) {
-            String match = equationBodyString.substring(multiplyMatcher.start(), multiplyMatcher.end());
-            String[] splitString = match.split("[*/]");
-            equationBodyString = equationBodyString.substring(0, multiplyMatcher.start()) + "<" + replacementIndex + equationBodyString.substring(multiplyMatcher.end());
+            val match = equationBodyString.substring(multiplyMatcher.start(), multiplyMatcher.end())
+            val splitString = match.split("[*/]".toRegex()).toTypedArray()
+            equationBodyString = equationBodyString.substring(0, multiplyMatcher.start()) + "<" + replacementIndex + equationBodyString.substring(multiplyMatcher.end())
             if (match.contains("*")) {
-                astNodes.add(new EqnAstNodeMultiply(stringToNode(splitString[0]), stringToNode(splitString[1])));
+                astNodes.add(EqnAstNodeMultiply(stringToNode(splitString[0])!!, stringToNode(splitString[1])!!))
             } else {
-                astNodes.add(new EqnAstNodeDivide(stringToNode(splitString[0]), stringToNode(splitString[1])));
+                astNodes.add(EqnAstNodeDivide(stringToNode(splitString[0])!!, stringToNode(splitString[1])!!))
             }
-
-            ++replacementIndex;
-            multiplyMatcher.reset();
-            multiplyMatcher = multiplyPattern.matcher(equationBodyString);
+            ++replacementIndex
+            multiplyMatcher.reset()
+            multiplyMatcher = multiplyPattern.matcher(equationBodyString)
         }
-
-        Matcher unaryMinusMatcher = Pattern.compile("-" + valueString).matcher(equationBodyString);
+        var unaryMinusMatcher = Pattern.compile("-$valueString").matcher(equationBodyString)
         while (unaryMinusMatcher.lookingAt()) {
-            String operand = equationBodyString.substring(unaryMinusMatcher.start() + 1, unaryMinusMatcher.end());
-            equationBodyString = equationBodyString.substring(0, unaryMinusMatcher.start()) + "<" + replacementIndex + equationBodyString.substring(unaryMinusMatcher.end());
-            astNodes.add(new EqnAstNodeUnaryMinus(stringToNode(operand)));
-            unaryMinusMatcher.reset();
-            unaryMinusMatcher = Pattern.compile("-" + valueString).matcher(equationBodyString);
-            ++replacementIndex;
+            val operand = equationBodyString.substring(unaryMinusMatcher.start() + 1, unaryMinusMatcher.end())
+            equationBodyString = equationBodyString.substring(0, unaryMinusMatcher.start()) + "<" + replacementIndex + equationBodyString.substring(unaryMinusMatcher.end())
+            astNodes.add(EqnAstNodeUnaryMinus(stringToNode(operand)!!))
+            unaryMinusMatcher.reset()
+            unaryMinusMatcher = Pattern.compile("-$valueString").matcher(equationBodyString)
+            ++replacementIndex
         }
-
-
-        Matcher addMatcher = addPattern.matcher(equationBodyString);
+        var addMatcher = addPattern.matcher(equationBodyString)
         while (addMatcher.find()) {
-            String match = equationBodyString.substring(addMatcher.start(), addMatcher.end());
-            String[] splitString = match.split("[+-]");
-            equationBodyString = equationBodyString.substring(0, addMatcher.start()) + "<" + replacementIndex + equationBodyString.substring(addMatcher.end());
-
+            val match = equationBodyString.substring(addMatcher.start(), addMatcher.end())
+            val splitString = match.split("[+-]".toRegex()).toTypedArray()
+            equationBodyString = equationBodyString.substring(0, addMatcher.start()) + "<" + replacementIndex + equationBodyString.substring(addMatcher.end())
             if (match.contains("+")) {
-                astNodes.add(new EqnAstNodeAdd(stringToNode(splitString[0]), stringToNode(splitString[1])));
+                astNodes.add(EqnAstNodeAdd(stringToNode(splitString[0])!!, stringToNode(splitString[1])!!))
             } else {
-                astNodes.add(new EqnAstNodeSubtract(stringToNode(splitString[0]), stringToNode(splitString[1])));
+                astNodes.add(EqnAstNodeSubtract(stringToNode(splitString[0])!!, stringToNode(splitString[1])!!))
             }
-            ++replacementIndex;
-            addMatcher.reset();
-            addMatcher = addPattern.matcher(equationBodyString);
+            ++replacementIndex
+            addMatcher.reset()
+            addMatcher = addPattern.matcher(equationBodyString)
         }
-
-        Matcher valueMatcher = valuePattern.matcher(equationBodyString);
-        if (valueMatcher.matches()) {
-            return stringToNode(valueMatcher.group());
+        val valueMatcher = valuePattern.matcher(equationBodyString)
+        return if (valueMatcher.matches()) {
+            stringToNode(valueMatcher.group())
         } else {
-            throw new BadBodyException("Couldn't resolve bracket-less and function-less expression");
+            throw BadBodyException("Couldn't resolve bracket-less and function-less expression")
         }
     }
 
-    private EqnAstNode stringToNode(String nodeString) throws BadBodyException {
-        switch (nodeString.charAt(0)) {
-            case '$':
-                return new EqnAstNodeVariable(nodeString.substring(1));
-            case '#':
-                return new EqnAstNodeDouble(nodeString.substring(1));
-            case '<':
-                int indexOfNode = Integer.parseInt(nodeString.substring(1));
+    @Throws(BadBodyException::class)
+    private fun stringToNode(nodeString: String): EqnAstNode? {
+        when (nodeString[0]) {
+            '$' -> return EqnAstNodeVariable(nodeString.substring(1))
+            '#' -> return EqnAstNodeDouble(nodeString.substring(1))
+            '<' -> {
+                val indexOfNode = nodeString.substring(1).toInt()
                 if (astNodes.elementAt(indexOfNode) == null) {
-                    throw new BadBodyException("astNodes at index is null, shouldn't happen!");
+                    throw BadBodyException("astNodes at index is null, shouldn't happen!")
                 }
-                return astNodes.elementAt(indexOfNode);
+                return astNodes.elementAt(indexOfNode)
+            }
         }
-        throw new BadBodyException("Unexpected symbol");
+        throw BadBodyException("Unexpected symbol")
     }
+
+    companion object {
+        private const val numberString = "(#[0-9.]+)"
+        private const val variableString = "(\\$[a-zA-Z]+)"
+        private const val replacedString = "(<[0-9]+)"
+        private const val valueString = "($numberString|$variableString|$replacedString)"
+        private val bracketDepthPattern = Pattern.compile("\\[_[0-9]+")
+        private val FunctionDepthPattern = Pattern.compile("\\(_[0-9]+")
+        private val valuePattern = Pattern.compile(valueString)
+        private val powerPattern = Pattern.compile("$valueString\\^$valueString")
+        private val multiplyPattern = Pattern.compile("$valueString[*/]$valueString")
+        private val addPattern = Pattern.compile("$valueString[+-]$valueString")
+
+        @Throws(EqnException::class)
+        fun parseEquationBody(equationBodyString: String): EqnAst {
+            return EqnAst(EqnBodyParser().parseEquationbodyInternal(equationBodyString)!!)
+        }
+
+        @Throws(EqnException::class)
+        private fun findMaximumDepth(equationBodyString: String, pattern: Pattern): Int {
+            var maximumBracketDepthSoFar = 0
+            val bracketDepthMatcher = pattern.matcher(equationBodyString)
+            while (bracketDepthMatcher.find()) {
+                maximumBracketDepthSoFar = try {
+                    max(maximumBracketDepthSoFar, bracketDepthMatcher.group().substring(2).toInt())
+                } catch (e: Exception) {
+                    throw EqnException("Could not convert bracket depth identifier to int", BadBodyException(e))
+                }
+            }
+            return maximumBracketDepthSoFar
+        }
+    }
+
 }

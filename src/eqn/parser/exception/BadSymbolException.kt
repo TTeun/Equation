@@ -1,8 +1,8 @@
 package eqn.parser.exception
 
-class BadSymbolException(val _reservedSymbol: Char) : EqnException("Input contains a reserved symbol!") {
+class BadSymbolException(private val reservedSymbol: Char) : EqnException("Input contains a reserved symbol!") {
     override fun toString(): String {
-        return super.toString() + " (" + _reservedSymbol + ')'
+        return super.toString() + " (" + reservedSymbol + ')'
     }
 
 }

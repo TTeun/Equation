@@ -3,7 +3,7 @@ package eqn.ast
 import eqn.parser.exception.EqnException
 import java.util.*
 
-abstract class EqnAstNodePreDefinedFunction(value: String) : EqnAstNode(value, Type.PreDefinedFunction, PrecedenceType.Function) {
+abstract class EqnAstNodePreDefinedFunction(value: String) : EqnAstNodeArbitraryArity(value, Type.PreDefinedFunction, PrecedenceType.Function) {
     override fun arity(): Int {
         return operands.size
     }

@@ -3,6 +3,12 @@ package eqn.ast
 class EqnAstNodeDouble : EqnAstNode {
     private var valueOfNode: Double
 
+
+    override fun getConstantValue(): Double {
+        throw UnsupportedOperationException("getConstantValue in EqnAstNodeDouble not supported")
+    }
+
+
     constructor(value: String) : super(value, Type.Constant, PrecedenceType.Terminal) {
         valueOfNode = value.toDouble()
     }
@@ -19,7 +25,9 @@ class EqnAstNodeDouble : EqnAstNode {
         return valueOfNode
     }
 
-    override fun simplify(): EqnAstNode? {
+    override fun arity(): Int = 0
+
+    override fun simplify(): EqnAstNode {
         return this
     }
 }

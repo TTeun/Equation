@@ -3,29 +3,31 @@ package eqn.ast
 import eqn.parser.exception.EqnException
 import java.util.*
 
-class EqnAstNodeMultiply() : EqnAstNode("Add", Type.Multiplication, PrecedenceType.Multiplication) {
-    override var constant = 1.0
+class EqnAstNodeMultiply() : EqnAstNodeArbitraryArity("Add", Type.Multiplication, PrecedenceType.Multiplication) {
+    private var constant: Double = 1.0
+
+    override fun getConstantValue() = constant
 
     constructor(left: EqnAstNode, right: EqnAstNode) : this() {
         addOperand(left)
         addOperand(right)
     }
 
-    fun multiply(multiplicant: Double) {
-        constant = constant * multiplicant
+    private fun multiply(multiplicand: Double) {
+        constant *= multiplicand
     }
 
     @Throws(EqnException::class)
-    override fun addOperand(eqnAstNode: EqnAstNode) {
-        when (eqnAstNode.type) {
-            Type.Constant -> constant *= eqnAstNode.evaluate()
+    override fun addOperand(operand: EqnAstNode) {
+        when (operand.type) {
+            Type.Constant -> this.multiply(operand.evaluate())
             Type.Multiplication -> {
-                constant *= eqnAstNode.constant
-                for (i in eqnAstNode.operands.indices) {
-                    addOperand(eqnAstNode.operands.elementAt(i))
+                constant *= operand.getConstantValue()
+                for (i in 0 until operand.arity()) {
+                    addOperand(operand.getNodeAt(i))
                 }
             }
-            else -> operands.add(eqnAstNode)
+            else -> operands.add(operand)
         }
     }
 
@@ -52,7 +54,7 @@ class EqnAstNodeMultiply() : EqnAstNode("Add", Type.Multiplication, PrecedenceTy
     }
 
     @Throws(EqnException::class)
-    override fun simplify(): EqnAstNode? {
+    override fun simplify(): EqnAstNode {
         for (i in operands.indices) {
             operands[i] = operands.elementAt(i).simplify()
         }

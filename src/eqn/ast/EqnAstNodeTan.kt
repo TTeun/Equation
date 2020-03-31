@@ -3,9 +3,9 @@ package eqn.ast
 import eqn.parser.exception.EqnException
 import kotlin.math.tan
 
-class EqnAstNodeTan(equationNode: EqnAstNode) : EqnAstNodePreDefinedUnaryFunction("tan", equationNode) {
+class EqnAstNodeTan(operand: EqnAstNode) : EqnAstNodeUnary("tan", Type.PreDefinedUnaryFunction, PrecedenceType.Function, operand) {
     @Throws(EqnException::class)
     override fun evaluate(): Double {
-        return tan(operand()!!.evaluate())
+        return tan(operand.evaluate())
     }
 }

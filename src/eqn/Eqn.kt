@@ -1,26 +1,21 @@
-package eqn;
+package eqn
 
-import eqn.ast.EqnAst;
-import eqn.parser.exception.EqnException;
-import org.jetbrains.annotations.NotNull;
+import eqn.ast.EqnAst
+import eqn.parser.exception.EqnException
 
-public class Eqn {
-
-    final private EqnHead equationHead;
-    final private EqnAst equationAst;
-
-    public Eqn(@NotNull EqnHead equationHead, @NotNull EqnAst equationAst) throws EqnException {
-        this.equationHead = equationHead;
-        this.equationAst = equationAst;
-        this.equationAst.simplify();
-
-        System.out.println("Equation created:");
-        System.out.println("\t" + equationHead.toString());
-        System.out.println("\t" + equationAst.toString());
+class Eqn(private val equationHead: EqnHead, private val equationAst: EqnAst) {
+    @Throws(EqnException::class)
+    fun evaluate(): Double {
+        return equationAst.evaluate()
     }
 
-    public Double evaluate() throws EqnException {
-        return equationAst.evaluate();
+    override fun toString(): String {
+        return "Equation created:\n\t$equationHead\n\t$equationAst"
     }
 
+
+    init {
+        equationAst.simplify()
+        println("Equation created:\n\t$equationHead\n\t$equationAst")
+    }
 }

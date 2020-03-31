@@ -1,28 +1,18 @@
-package eqn;
+package eqn
 
-import org.jetbrains.annotations.NotNull;
+import java.util.*
 
-import java.util.Vector;
-
-public class EqnHead {
-
-    final public String functionName;
-    final public Vector<String> variableNames;
-
-    public EqnHead(String functionName) {
-        this.functionName = functionName;
-        this.variableNames = new Vector<>();
+class EqnHead(private val functionName: String) {
+    private val variableNames: Vector<String> = Vector()
+    fun addVariableName(name: String) {
+        variableNames.add(name)
     }
 
-    public void addVariableName(@NotNull String name) {
-        this.variableNames.add(name);
-    }
-
-    @Override
-    public String toString() {
+    override fun toString(): String {
         return "EquationHead{" +
                 "functionName='" + functionName + '\'' +
                 ", variableNames=" + variableNames +
-                '}';
+                '}'
     }
+
 }

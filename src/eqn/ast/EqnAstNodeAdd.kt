@@ -3,8 +3,10 @@ package eqn.ast
 import eqn.parser.exception.EqnException
 import java.util.*
 
-class EqnAstNodeAdd() : EqnAstNode("Add", Type.Addition, PrecedenceType.Addition) {
-    override var constant = 0.0
+class EqnAstNodeAdd() : EqnAstNodeArbitraryArity("Add", Type.Addition, PrecedenceType.Addition) {
+    private var constant = 0.0
+
+    override fun getConstantValue() = constant
 
     constructor(left: EqnAstNode, right: EqnAstNode) : this() {
         addOperand(left)
@@ -12,16 +14,17 @@ class EqnAstNodeAdd() : EqnAstNode("Add", Type.Addition, PrecedenceType.Addition
     }
 
     @Throws(EqnException::class)
-    override fun addOperand(eqnAstNode: EqnAstNode) {
-        when (eqnAstNode.type) {
-            Type.Constant -> constant += eqnAstNode.evaluate()
+    override fun addOperand(operand: EqnAstNode) {
+        val simplifiedOperand: EqnAstNode = operand.simplify()
+        when (simplifiedOperand.type) {
+            Type.Constant -> constant += simplifiedOperand.evaluate()
             Type.Addition -> {
-                constant += eqnAstNode.constant
-                for (i in eqnAstNode.operands.indices) {
-                    addOperand(eqnAstNode.operands.elementAt(i))
+                constant += simplifiedOperand.getConstantValue()
+                for (i in 0 until simplifiedOperand.arity()) {
+                    addOperand(simplifiedOperand.getNodeAt(i))
                 }
             }
-            else -> operands.add(eqnAstNode)
+            else -> operands.add(simplifiedOperand)
         }
     }
 
@@ -35,7 +38,7 @@ class EqnAstNodeAdd() : EqnAstNode("Add", Type.Addition, PrecedenceType.Addition
     }
 
     override fun toString(): String {
-        val stringBuffer = StringBuffer(if (constant == 1.0) "" else "$constant+")
+        val stringBuffer = StringBuffer(if (constant == 0.0) "" else "$constant+")
         if (operands.size != 0) {
             for (i in operands.indices) {
                 stringBuffer.append(operands.elementAt(i).toString() + "+")
@@ -48,7 +51,7 @@ class EqnAstNodeAdd() : EqnAstNode("Add", Type.Addition, PrecedenceType.Addition
     }
 
     @Throws(EqnException::class)
-    override fun simplify(): EqnAstNode? {
+    override fun simplify(): EqnAstNode {
         for (i in operands.indices) {
             operands[i] = operands.elementAt(i).simplify()
         }

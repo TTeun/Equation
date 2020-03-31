@@ -2,9 +2,9 @@ package eqn.ast
 
 import eqn.parser.exception.EqnException
 
-class EqnAstNodeDivide(leftOperand: EqnAstNode?, rightOperand: EqnAstNode?) : EqnAstNodeBinaryOperation("/", leftOperand, rightOperand, PrecedenceType.Multiplication, Type.Division) {
+class EqnAstNodeDivide(leftOperand: EqnAstNode, rightOperand: EqnAstNode) : EqnAstNodeBinary("/", Type.Division, PrecedenceType.Multiplication, leftOperand, rightOperand) {
     @Throws(EqnException::class)
     override fun evaluate(): Double {
-        return left().evaluate() / right().evaluate()
+        return left.evaluate() / right.evaluate()
     }
 }
