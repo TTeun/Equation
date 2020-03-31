@@ -18,10 +18,10 @@ public class EqnBodyParser {
     static private final Pattern FunctionDepthPattern = Pattern.compile("\\(_[0-9]+");
     static private final Pattern valuePattern = Pattern.compile(valueString);
     static private final Pattern powerPattern = Pattern.compile(valueString + "\\^" + valueString);
-    static private final Pattern multiplyPattern = Pattern.compile(valueString + "(\\*|/)" + valueString);
-    static private final Pattern addPattern = Pattern.compile(valueString + "(\\+|-)" + valueString);
+    static private final Pattern multiplyPattern = Pattern.compile(valueString + "[*/]" + valueString);
+    static private final Pattern addPattern = Pattern.compile(valueString + "[+-]" + valueString);
+    private final Vector<EqnAstNode> astNodes;
     private int replacementIndex = 0;
-    private Vector<EqnAstNode> astNodes;
 
     private EqnBodyParser() {
         astNodes = new Vector<>(0);
@@ -122,10 +122,10 @@ public class EqnBodyParser {
         Matcher multiplyMatcher = multiplyPattern.matcher(equationBodyString);
         while (multiplyMatcher.find()) {
             String match = equationBodyString.substring(multiplyMatcher.start(), multiplyMatcher.end());
-            String[] splitString = match.split("\\*|/");
+            String[] splitString = match.split("[*/]");
             equationBodyString = equationBodyString.substring(0, multiplyMatcher.start()) + "<" + replacementIndex + equationBodyString.substring(multiplyMatcher.end());
             if (match.contains("*")) {
-                astNodes.add(new EqnAstNodeSetMultiply(stringToNode(splitString[0]), stringToNode(splitString[1])));
+                astNodes.add(new EqnAstNodeMultiply(stringToNode(splitString[0]), stringToNode(splitString[1])));
             } else {
                 astNodes.add(new EqnAstNodeDivide(stringToNode(splitString[0]), stringToNode(splitString[1])));
             }
@@ -153,7 +153,7 @@ public class EqnBodyParser {
             equationBodyString = equationBodyString.substring(0, addMatcher.start()) + "<" + replacementIndex + equationBodyString.substring(addMatcher.end());
 
             if (match.contains("+")) {
-                astNodes.add(new EqnAstNodeSetAdd(stringToNode(splitString[0]), stringToNode(splitString[1])));
+                astNodes.add(new EqnAstNodeAdd(stringToNode(splitString[0]), stringToNode(splitString[1])));
             } else {
                 astNodes.add(new EqnAstNodeSubtract(stringToNode(splitString[0]), stringToNode(splitString[1])));
             }

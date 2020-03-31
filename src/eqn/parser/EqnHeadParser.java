@@ -18,7 +18,9 @@ public class EqnHeadParser {
 
         equationHeadString = equationHeadString.trim();
         Matcher functionNameMatcher = functionNamePattern.matcher(equationHeadString);
-        functionNameMatcher.find();
+        if (!functionNameMatcher.find()) {
+            throw new BadHeaderException("Cannot discern name of function");
+        }
 
         if (functionNameMatcher.start() != 0) {
             throw new BadHeaderException("Start of header formatted incorrectly after pre-processing");
