@@ -1,10 +1,10 @@
-package eqn.ast
+package eqn.ast.base
 
 import eqn.parser.exception.EqnException
 
 abstract class EqnAstNode {
-    val type: Type
     val value: String
+    val type: Type
     val precedenceType: PrecedenceType
 
     constructor(precedenceType: PrecedenceType) {
@@ -36,20 +36,20 @@ abstract class EqnAstNode {
     }
 
     @Throws(EqnException::class)
-    protected open fun simplifyChildren() {
+    protected open fun simplifyChildren(arguments: Map<String, Double>?) {
         throw java.lang.UnsupportedOperationException()
     }
 
     @Throws(EqnException::class)
-    abstract fun evaluate(): Double
+    abstract fun evaluate(arguments: Map<String, Double>?): Double
 
     abstract fun arity(): Int
 
     @Throws(EqnException::class)
-    abstract fun simplify(): EqnAstNode
+    abstract fun simplify(arguments: Map<String, Double>?): EqnAstNode
 
     enum class Type {
-        Constant, Variable, Subtraction, Addition, Multiplication, Division, Fraction, Power, UnaryOperation, PreDefinedUnaryFunction, CustomUnaryFunction, PreDefinedFunction, CustomFunction, Error
+        Constant, Variable, Subtraction, Addition, Multiplication, Fraction, Power, UnaryOperation, PreDefinedUnaryFunction, CustomUnaryFunction, PreDefinedFunction, CustomFunction, Error
     }
 
     enum class PrecedenceType {

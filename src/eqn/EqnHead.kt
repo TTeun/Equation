@@ -5,6 +5,8 @@ class EqnHead(private val functionName: String, private val variableNames: Array
         variableNames.add(name)
     }
 
+    fun getVariableNames(): ArrayList<String> = variableNames
+
     override fun toString(): String {
         return "EquationHead{" +
                 "functionName='" + functionName + '\'' +

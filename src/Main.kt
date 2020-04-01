@@ -1,13 +1,16 @@
-import eqn.Eqn;
-import eqn.parser.EqnParser;
-import eqn.parser.exception.EqnException;
+import eqn.parser.EqnParser.parseEquation
+import eqn.parser.exception.EqnException
 
-public class Main {
-    public static void main(String[] args) {
+object Main {
+    @JvmStatic
+    fun main(args: Array<String>) {
         try {
-            Eqn equation = EqnParser.parseEquation("f(x,y) =12 +  2 * x * y *3 - z * 4 - 1 *4");
-        } catch (EqnException e) {
-            System.out.println(e.toString());
+            val equation = parseEquation("f(x,y) = x ^ y")
+            println(equation.evaluate(mapOf("x" to 2.0, "y" to 1.1, "z" to 9.0)))
+            equation.simplify(mapOf("x" to 2.0, "y" to 1.1))
+            println("$equation")
+        } catch (e: EqnException) {
+            println(e.toString())
         }
     }
 }

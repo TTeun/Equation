@@ -1,5 +1,6 @@
-package eqn.ast
+package eqn.ast.base
 
+import eqn.ast.*
 import eqn.parser.exception.EqnException
 import java.security.InvalidParameterException
 
@@ -9,15 +10,15 @@ abstract class EqnAstNodeUnary(value: String, type: Type, precedenceType: Preced
         throw UnsupportedOperationException("getConstantValue in EqnAstNodeUnary not supported")
     }
 
-    override fun simplifyChildren() {
-        operand = operand.simplify()
+    override fun simplifyChildren(arguments: Map<String, Double>?) {
+        operand = operand.simplify(arguments)
     }
 
     @Throws(EqnException::class)
-    override fun simplify(): EqnAstNode {
-        simplifyChildren()
+    override fun simplify(arguments: Map<String, Double>?): EqnAstNode {
+        simplifyChildren(arguments)
         return if (operand.type == Type.Constant) {
-            EqnAstNodeDouble(evaluate())
+            EqnAstNodeDouble(evaluate(null))
         } else this
     }
 

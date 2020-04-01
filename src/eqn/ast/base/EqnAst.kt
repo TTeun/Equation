@@ -1,12 +1,12 @@
-package eqn.ast
+package eqn.ast.base
 
-import eqn.ast.EqnAstNode
+import eqn.ast.EqnAstNodeDouble
 import eqn.parser.exception.EqnException
 
 class EqnAst(private var root: EqnAstNode) {
     @Throws(EqnException::class)
-    fun simplify() {
-        root = root.simplify()
+    fun simplify(arguments: Map<String, Double>?) {
+        root = root.simplify(arguments)
         if (root.type == EqnAstNode.Type.Constant) {
             root = EqnAstNodeDouble(root.value.toDouble())
         }
@@ -19,5 +19,5 @@ class EqnAst(private var root: EqnAstNode) {
     }
 
     @Throws(EqnException::class)
-    fun evaluate(): Double = root.evaluate()
+    fun evaluate(arguments: Map<String, Double>?): Double = root.evaluate(arguments)
 }

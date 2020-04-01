@@ -1,5 +1,6 @@
-package eqn.ast
+package eqn.ast.base
 
+import eqn.ast.EqnAstNodeDouble
 import eqn.parser.exception.EqnException
 import java.security.InvalidParameterException
 
@@ -8,9 +9,9 @@ abstract class EqnAstNodeBinary(value: String, type: Type, precedenceType: Prece
         throw UnsupportedOperationException("getConstantValue in EqnAstNodeBinary not supported")
     }
 
-    override fun simplifyChildren() {
-        left = left.simplify()
-        right = right.simplify()
+    override fun simplifyChildren(arguments: Map<String, Double>?) {
+        left = left.simplify(arguments)
+        right = right.simplify(arguments)
     }
 
     override fun toString(): String {
@@ -37,10 +38,10 @@ abstract class EqnAstNodeBinary(value: String, type: Type, precedenceType: Prece
     override fun arity(): Int = 2
 
     @Throws(EqnException::class)
-    override fun simplify(): EqnAstNode {
-        simplifyChildren()
+    override fun simplify(arguments: Map<String, Double>?): EqnAstNode {
+        simplifyChildren(arguments)
         return if (left.type == Type.Constant && right.type == Type.Constant) {
-            EqnAstNodeDouble(evaluate())
+            EqnAstNodeDouble(evaluate(null))
         } else this
     }
 

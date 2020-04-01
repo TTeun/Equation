@@ -1,18 +1,20 @@
 package eqn.ast
 
+import eqn.ast.base.EqnAstNode
+import eqn.ast.base.EqnAstNodeBinary
 import eqn.parser.exception.EqnException
 import kotlin.math.pow
 
 class EqnAstNodePower(leftOperand: EqnAstNode, rightOperand: EqnAstNode) : EqnAstNodeBinary("^", Type.Power, PrecedenceType.Power, leftOperand, rightOperand) {
 
     @Throws(EqnException::class)
-    override fun evaluate(): Double {
-        return left.evaluate().pow(right.evaluate())
+    override fun evaluate(arguments: Map<String, Double>?): Double {
+        return left.evaluate(arguments).pow(right.evaluate(arguments))
     }
 
     @Throws(EqnException::class)
-    override fun simplify(): EqnAstNode {
-        simplifyChildren()
+    override fun simplify(arguments: Map<String, Double>?): EqnAstNode {
+        simplifyChildren(arguments)
         if (right.type == Type.Constant) {
             if (right.value.toDouble() == 0.0) {
                 return EqnAstNodeDouble(1.0)
@@ -26,6 +28,6 @@ class EqnAstNodePower(leftOperand: EqnAstNode, rightOperand: EqnAstNode) : EqnAs
                 return EqnAstNodeDouble(1.0)
             }
         }
-        return super.simplify()
+        return super.simplify(arguments)
     }
 }

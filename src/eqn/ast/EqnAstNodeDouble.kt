@@ -1,5 +1,7 @@
 package eqn.ast
 
+import eqn.ast.base.EqnAstNode
+
 class EqnAstNodeDouble : EqnAstNode {
     private var valueOfNode: Double
 
@@ -19,13 +21,13 @@ class EqnAstNodeDouble : EqnAstNode {
         return valueOfNode.toString()
     }
 
-    override fun evaluate(): Double {
+    override fun evaluate(arguments: Map<String, Double>?): Double {
         return valueOfNode
     }
 
     override fun arity(): Int = 0
 
-    override fun simplify(): EqnAstNode {
+    override fun simplify(arguments: Map<String, Double>?): EqnAstNode {
         return this
     }
 }

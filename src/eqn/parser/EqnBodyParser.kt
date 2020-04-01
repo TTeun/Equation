@@ -1,7 +1,9 @@
 package eqn.parser
 
 import eqn.ast.*
-import eqn.ast.EqnAstNodeUnary.Companion.create
+import eqn.ast.base.EqnAst
+import eqn.ast.base.EqnAstNode
+import eqn.ast.base.EqnAstNodeUnary.Companion.create
 import eqn.parser.exception.BadBodyException
 import eqn.parser.exception.EqnException
 import java.util.*
@@ -95,7 +97,7 @@ class EqnBodyParser private constructor() {
             if (match.contains("*")) {
                 astNodes.add(EqnAstNodeMultiply(stringToNode(splitString[0])!!, stringToNode(splitString[1])!!))
             } else {
-                astNodes.add(EqnAstNodeDivide(stringToNode(splitString[0])!!, stringToNode(splitString[1])!!))
+                astNodes.add(EqnAstNodeFraction(stringToNode(splitString[0])!!, stringToNode(splitString[1])!!))
             }
             ++replacementIndex
             multiplyMatcher.reset()

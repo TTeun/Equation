@@ -1,8 +1,18 @@
 package eqn.ast
 
-import eqn.parser.exception.EqnException
+import eqn.ast.base.EqnAstNode
 
 class EqnAstNodeVariable(value: String) : EqnAstNode(value, Type.Variable, PrecedenceType.Terminal) {
+
+    override fun evaluate(arguments: Map<String, Double>?): Double {
+        if (arguments == null) {
+            throw IllegalArgumentException("Evaluating variable where variable is not assigned as value (EqnAstNodeVariable)")
+        }
+        if (arguments.containsKey(value)) {
+            return arguments[value]!!
+        }
+        throw IllegalArgumentException("Evaluating variable where variable is not assigned as value (EqnAstNodeVariable)")
+    }
 
     override fun getConstantValue(): Double {
         throw UnsupportedOperationException("getConstantValue in EqnAstNodeVariable not supported")
@@ -12,12 +22,13 @@ class EqnAstNodeVariable(value: String) : EqnAstNode(value, Type.Variable, Prece
         return value
     }
 
-    @Throws(EqnException::class)
-    override fun evaluate(): Double {
-        throw EqnException("Evaluate for variable not yet implemented!")
-    }
-
-    override fun simplify(): EqnAstNode {
+    override fun simplify(arguments: Map<String, Double>?): EqnAstNode {
+        if (arguments == null) {
+            return this
+        }
+        if (arguments.containsKey(value)) {
+            return EqnAstNodeDouble(arguments[value]!!)
+        }
         return this
     }
 

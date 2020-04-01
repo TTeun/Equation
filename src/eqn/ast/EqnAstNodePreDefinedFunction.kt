@@ -1,5 +1,7 @@
 package eqn.ast
 
+import eqn.ast.base.EqnAstNode
+import eqn.ast.base.EqnAstNodeArbitraryArity
 import eqn.parser.exception.EqnException
 
 abstract class EqnAstNodePreDefinedFunction(value: String) : EqnAstNodeArbitraryArity(value, Type.PreDefinedFunction, PrecedenceType.Function) {

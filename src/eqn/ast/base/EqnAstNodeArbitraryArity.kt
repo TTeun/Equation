@@ -1,4 +1,4 @@
-package eqn.ast
+package eqn.ast.base
 
 import java.security.InvalidParameterException
 
@@ -16,9 +16,9 @@ abstract class EqnAstNodeArbitraryArity(value: String, type: Type, precedenceTyp
         return operands[index]
     }
 
-    override fun simplifyChildren() {
+    override fun simplifyChildren(arguments: Map<String, Double>?) {
         for (i in operands.indices) {
-            operands[i] = operands[i].simplify()
+            operands[i] = operands[i].simplify(arguments)
         }
     }
 
